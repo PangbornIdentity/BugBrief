@@ -136,7 +136,7 @@ Keep reporting query logic in application/query services, not directly in contro
 
 Use Jira only as private discovery context.
 
-If Jira credentials and configuration are available in Codex global settings or environment variables, use them. Do not ask me to paste tokens into the chat. If the Jira base URL, email/user, project keys, or credential names are missing, ask only for the missing non-secret configuration. Never print or commit the token.
+If Jira credentials and configuration are available in Codex global settings, secret files, connectors, or environment variables, use them. Check the global Codex configuration area for Jira/Atlassian credentials before asking me for anything. Do not ask me to paste tokens into the chat. If the Jira base URL, email/user, project keys, or credential names are missing, ask only for the missing non-secret configuration. Never print or commit credential paths, tokens, raw values, or raw Jira payloads.
 
 Discovery target:
 
