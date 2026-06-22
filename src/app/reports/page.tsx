@@ -73,8 +73,8 @@ export default function ReportsPage() {
               <p className="mt-2 text-2xl font-semibold">{model.summary.slaBreached}</p>
             </div>
             <div className="rounded-md border border-zinc-200 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Avg time to fix</p>
-              <p className="mt-2 text-2xl font-semibold">{model.summary.averageTimeToFixDays}d</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">P0/P1/P2 avg time to fix</p>
+              <p className="mt-2 text-2xl font-semibold">{model.summary.highPriorityAverageTimeToFixDays}d</p>
             </div>
           </div>
         </section>

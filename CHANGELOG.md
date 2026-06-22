@@ -13,3 +13,4 @@ All notable public-safe changes to BugBrief are tracked here.
 - Added unit tests for SLA and reporting behavior.
 - Added persistent app navigation with Dashboard, Issues, Reports, Settings, and API links.
 - Added initial Issues, Reports, and Settings pages backed by synthetic data.
+- Fixed review findings around workspace-local P0 SLA boundaries, resolved-status imports without timestamps, high-priority average time-to-fix labeling, breached-state iconography, and server-only Supabase service client protection.

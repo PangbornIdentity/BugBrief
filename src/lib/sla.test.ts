@@ -58,7 +58,7 @@ describe("calculateSla", () => {
     expect(result.breachedAt).toBe("2026-06-16T12:00:00.000Z");
   });
 
-  it("uses same-day target for P0", () => {
+  it("uses UTC same-day target by default for P0", () => {
     const result = calculateSla(
       {
         ...baseIssue,
@@ -72,5 +72,36 @@ describe("calculateSla", () => {
 
     expect(result.state).toBe("missed");
     expect(result.dueAt).toBe("2026-06-18T23:59:59.999Z");
+  });
+
+  it("uses the workspace local day for P0 same-day targets", () => {
+    const result = calculateSla(
+      {
+        ...baseIssue,
+        priority: "P0",
+        createdAt: "2026-06-23T03:00:00.000Z",
+        fixedAt: "2026-06-23T06:30:00.000Z",
+      },
+      defaultSlaPolicies.P0,
+      new Date("2026-06-23T18:00:00.000Z"),
+      "America/Los_Angeles",
+    );
+
+    expect(result.state).toBe("met");
+    expect(result.dueAt).toBe("2026-06-23T06:59:59.999Z");
+  });
+
+  it("treats resolved statuses without timestamps as resolved instead of open", () => {
+    const result = calculateSla(
+      {
+        ...baseIssue,
+        status: "closed",
+      },
+      defaultSlaPolicies.P1,
+      new Date("2026-06-22T18:00:00.000Z"),
+    );
+
+    expect(result.state).toBe("missed");
+    expect(result.breachedAt).toBe("2026-06-15T10:00:00.000Z");
   });
 });

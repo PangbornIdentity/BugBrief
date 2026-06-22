@@ -10,6 +10,7 @@ export type DashboardSummary = {
   slaAtRisk: number;
   slaBreached: number;
   averageTimeToFixDays: number;
+  highPriorityAverageTimeToFixDays: number;
 };
 
 export type PrioritySlaRow = {
@@ -150,12 +151,20 @@ function buildTimeToFixRows(issues: IssueWithSla[]): TimeToFixRow[] {
   });
 }
 
-export function getEnrichedIssues(issues: Issue[] = demoIssues, now: Date = demoNow): IssueWithSla[] {
-  return issues.map((issue) => enrichIssue(issue, now));
+export function getEnrichedIssues(
+  issues: Issue[] = demoIssues,
+  now: Date = demoNow,
+  workspaceTimeZone = "UTC",
+): IssueWithSla[] {
+  return issues.map((issue) => enrichIssue(issue, now, workspaceTimeZone));
 }
 
-export function buildDashboardModel(issues: Issue[] = demoIssues, now: Date = demoNow): DashboardModel {
-  const enriched = getEnrichedIssues(issues, now);
+export function buildDashboardModel(
+  issues: Issue[] = demoIssues,
+  now: Date = demoNow,
+  workspaceTimeZone = "UTC",
+): DashboardModel {
+  const enriched = getEnrichedIssues(issues, now, workspaceTimeZone);
   const openIssues = enriched.filter(isOpen);
   const highPriorityOpen = openIssues.filter((issue) => isHighPriority(issue.priority));
   const highPriorityClosed = enriched.filter(
@@ -163,6 +172,10 @@ export function buildDashboardModel(issues: Issue[] = demoIssues, now: Date = de
   );
   const met = highPriorityClosed.filter((issue) => issue.sla.state === "met").length;
   const fixedDurations = enriched
+    .map((issue) => issue.timeToFixDays)
+    .filter((value): value is number => value !== null);
+  const highPriorityFixedDurations = enriched
+    .filter((issue) => isHighPriority(issue.priority))
     .map((issue) => issue.timeToFixDays)
     .filter((value): value is number => value !== null);
 
@@ -189,6 +202,7 @@ export function buildDashboardModel(issues: Issue[] = demoIssues, now: Date = de
       slaAtRisk: highPriorityOpen.filter((issue) => issue.sla.state === "at_risk").length,
       slaBreached: highPriorityOpen.filter((issue) => issue.sla.state === "breached").length,
       averageTimeToFixDays: average(fixedDurations),
+      highPriorityAverageTimeToFixDays: average(highPriorityFixedDurations),
     },
     influxByWeek: buildInfluxRows(enriched),
     slaByPriority: buildSlaRows(enriched),

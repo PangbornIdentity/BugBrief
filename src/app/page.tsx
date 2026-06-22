@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, CheckCircle2, Clock3, Download, Plus, ShieldCheck } from "lucide-react";
+import { Activity, AlertOctagon, AlertTriangle, Clock3, Download, Plus, ShieldCheck } from "lucide-react";
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { buildDashboardModel } from "@/lib/reports";
@@ -122,7 +122,7 @@ export default function Home() {
             label="Breached"
             value={model.summary.slaBreached.toString()}
             detail="Open high-priority work beyond the configured SLA target."
-            icon={<CheckCircle2 size={20} aria-hidden="true" />}
+            icon={<AlertOctagon size={20} aria-hidden="true" />}
             tone="red"
           />
         </section>
@@ -135,7 +135,7 @@ export default function Home() {
               <h2 className="text-base font-semibold text-zinc-950">High-priority SLA watchlist</h2>
               <p className="mt-1 text-sm text-zinc-600">Open P0/P1/P2 issues sorted by breach risk and due date.</p>
             </div>
-            <div className="text-sm font-medium text-zinc-600">Avg time to fix: {model.summary.averageTimeToFixDays} days</div>
+            <div className="text-sm font-medium text-zinc-600">P0/P1/P2 avg time to fix: {model.summary.highPriorityAverageTimeToFixDays} days</div>
           </div>
 
           <div className="mt-4 overflow-x-auto">
