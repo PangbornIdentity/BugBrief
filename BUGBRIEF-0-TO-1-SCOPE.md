@@ -85,13 +85,16 @@ Future user: an engineering manager who wants release health, severity trends, a
 - Reporting dashboard: bug volume over time, severity distribution, status distribution, top product areas, average time to triage, average time to close.
 - Search and filters.
 - Activity timeline for each bug.
+- REST API for AI clients to create, update, query, and report on issues without manual UI entry.
+- API key management for AI/API clients, with hashed keys, scopes, one-time plaintext display, and audit logging.
+- OpenAPI document at `/api/v1/openapi.json` so AI tools can understand the API contract.
 - Public-safe synthetic demo seed.
 - `/api/health` route for deployment checks.
 - Basic CSV export for filtered bug lists.
 
 ### Out Of Scope For MVP
 
-- Jira, GitHub Issues, Linear, Slack, or email sync.
+- Full bidirectional Jira, GitHub Issues, Linear, Slack, or email sync. Private Jira discovery and one-way import planning are allowed when credentials are available, but raw Jira data must never be committed.
 - AI summarization or duplicate detection.
 - Public unauthenticated bug intake forms.
 - Complex custom fields.
@@ -112,6 +115,8 @@ Future user: an engineering manager who wants release health, severity trends, a
 | UI | Tailwind CSS + shadcn/ui-style primitives + lucide icons | Keep UI quiet, dense, and operational. |
 | Forms | React Hook Form + Zod | Shared validation between UI and server actions. |
 | Charts | Recharts or Tremor-style chart primitives | Keep charts simple and readable. |
+| REST API | Next.js route handlers under `/api/v1/*` | Used by AI clients and future integrations. |
+| API auth | App-generated scoped API keys | Hash keys at rest and audit writes. |
 | Testing | Vitest, Testing Library, Playwright | Unit for transforms, E2E for critical flows. |
 | CI | GitHub Actions | Typecheck, lint, test, build. |
 

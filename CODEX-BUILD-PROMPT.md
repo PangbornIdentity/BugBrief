@@ -4,13 +4,15 @@ Copy/paste this prompt into a fresh Codex thread pointed at the `PangbornIdentit
 
 ---
 
-You are the lead Codex agent for `BugBrief`, a public GitHub repository. Build a C# web application for storing, analyzing, and reporting bug information.
+You are the lead Codex agent for `BugBrief`, a public GitHub repository. Build a public-repo-safe web application for storing, updating, analyzing, and reporting bug information.
 
 ## Mission
 
-Create BugBrief as a public-repo-safe C# web app that helps track bug influx over time, bug age, escaped bugs, unescaped defects, missed requirements, origin/source, diagnosis quality, fix quality, and follow-up quality for high-priority issues.
+Create BugBrief as a Next.js + Supabase + Vercel application that helps track bug influx over time, bug age, escaped bugs, unescaped defects, missed requirements, origin/source, diagnosis quality, fix quality, and follow-up quality for high-priority issues.
 
 The app must be useful for my personal development workflow, but configurable enough that other teams can use different terminology, statuses, severities, and workflows.
+
+The app must expose a REST API so my AI tools can create, update, query, and report on issue data without me manually entering everything through the UI.
 
 ## Critical Public Repo Constraint
 
@@ -19,6 +21,7 @@ This repository is public. Assume every committed file is world-readable.
 Commit publicly:
 
 - Source code.
+- Supabase migrations and RLS policies.
 - Synthetic fixtures and seed data only.
 - Public-safe setup docs.
 - Public `CHANGELOG.md` with sanitized user-facing changes.
@@ -26,33 +29,29 @@ Commit publicly:
 
 Do not commit:
 
-- Jira API keys, exports, issue keys, ticket links, copied Jira text, attachments, customer names, real screenshots, production logs, stack traces with private paths, internal URLs, release pipeline runbooks, deployment topology, environment names, approval gates, rollback procedures, cloud account details, or secrets.
+- Jira API keys, Supabase service role keys, Vercel tokens, `.env.local`, exports, issue keys, ticket links, copied Jira text, attachments, customer names, real screenshots, production logs, stack traces with private paths, internal URLs, release pipeline runbooks, deployment topology, environment names, approval gates, rollback procedures, cloud account details, or secrets.
 - Anything derived from Jira unless it has been transformed into anonymized requirements, field mappings, or aggregate metrics.
 
 If you discover private or proprietary material locally, do not copy it into the repo. Summarize it privately in your response only when needed, and sanitize aggressively.
 
 ## Preferred Technical Direction
 
-Use a C#/.NET application. MVC is fine, Razor Pages is fine, but choose the option that best supports a clean operational UI with charts and tables.
+Use the Vercel-native stack:
 
-Recommended default:
+- Next.js App Router + TypeScript.
+- Vercel for hosting the web app and REST API route handlers.
+- Supabase Postgres for the relational database.
+- Supabase Auth for user authentication.
+- Supabase Row Level Security for user/workspace isolation.
+- Supabase Storage for private attachments if attachments are implemented.
+- Tailwind CSS + shadcn/ui-style primitives + lucide icons.
+- TanStack Table for dense issue lists.
+- Recharts, Tremor-style primitives, or ECharts for charts.
+- React Hook Form + Zod for form validation.
+- Vitest + Testing Library for unit/component tests.
+- Playwright for E2E tests.
 
-- ASP.NET Core MVC or Razor Pages.
-- Entity Framework Core.
-- PostgreSQL as the primary database.
-- Supabase may be used as managed Postgres/Auth/storage if appropriate, but the app should remain a .NET web app.
-- Use JavaScript charting in Razor/MVC views: Chart.js, ApexCharts, or ECharts.
-- Use Bootstrap, Tailwind, or another practical UI system, but keep the UI dense, scannable, and operational.
-- Prefer a layered solution structure:
-  - `BugBrief.Web`
-  - `BugBrief.Application`
-  - `BugBrief.Domain`
-  - `BugBrief.Infrastructure`
-  - `BugBrief.Tests.Unit`
-  - `BugBrief.Tests.Integration`
-  - `BugBrief.Tests.E2E` if browser tests are practical.
-
-If Vercel is not appropriate for hosting the .NET app, say so clearly and recommend a .NET-friendly hosting path such as Azure App Service, Render, Railway, Fly.io, or container hosting. Do not force Vercel if it creates unnecessary architecture friction.
+Do not build this as C#/.NET unless I explicitly reverse this decision later.
 
 ## Product Language And Domain Rules
 
@@ -62,7 +61,7 @@ My default terminology:
 
 - "Bug" means an escaped issue.
 - "Defect" means an unescaped issue caught before escape.
-- Every bug/defect comes from an origin/source code or component.
+- Every bug/defect comes from an origin/source code, component, area, or system.
 - Every bug/defect is missed from a requirement.
 - High-priority issues are P0, P1, and P2.
 - For P0/P1/P2, track how well we diagnose, patch, follow up, and root-cause-fix.
@@ -83,6 +82,8 @@ Do not hard-code those words as the only possible vocabulary. Model them as conf
 
 Build toward these capabilities:
 
+- Supabase Auth sign-up/sign-in/sign-out.
+- Workspace/project model, even if MVP creates one default workspace per user.
 - Create/edit/view issues.
 - Classify as escaped bug or unescaped defect.
 - Track severity and priority.
@@ -106,6 +107,55 @@ Build toward these capabilities:
 - Provide filtered lists and saved views.
 - Provide dashboards and charts.
 - Provide CSV export from filtered views.
+- Provide API key management for AI/API clients.
+- Provide an OpenAPI document for the REST API.
+- Audit all AI/API writes.
+
+## REST API Requirements For AI Clients
+
+Expose versioned REST endpoints under `/api/v1`.
+
+Minimum API surface:
+
+```text
+GET    /api/v1/health
+GET    /api/v1/openapi.json
+
+GET    /api/v1/issues
+POST   /api/v1/issues
+GET    /api/v1/issues/{id}
+PATCH  /api/v1/issues/{id}
+DELETE /api/v1/issues/{id}
+
+GET    /api/v1/config/terminology
+GET    /api/v1/config/statuses
+GET    /api/v1/config/priorities
+GET    /api/v1/config/sources
+GET    /api/v1/config/requirement-categories
+
+GET    /api/v1/reports/influx
+GET    /api/v1/reports/aging
+GET    /api/v1/reports/escaped-ratio
+GET    /api/v1/reports/priority-diagnostics
+
+POST   /api/v1/import/jira/discover
+POST   /api/v1/import/jira/sync
+GET    /api/v1/import/runs
+GET    /api/v1/import/runs/{id}
+```
+
+API rules:
+
+- Browser users authenticate with Supabase Auth.
+- AI clients authenticate with app-generated API keys, not the Supabase service role key.
+- API keys must be hashed at rest.
+- Plaintext API keys are shown once.
+- Support scoped API keys: read-only, issue write, import, admin.
+- Log API requests in an audit table: key id/name, actor, method, path, status, duration, timestamp, and body hash for writes.
+- Never log full request bodies by default.
+- Use Zod schemas for request validation.
+- Return consistent JSON envelopes for success and errors.
+- Generate or maintain `/api/v1/openapi.json` so AI tools can understand the API contract.
 
 ## Dashboard And Reporting Requirements
 
@@ -130,7 +180,7 @@ Initial dashboards should include:
 - Follow-up completion rate for high-priority issues.
 - Recurring source/origin hotspots.
 
-Keep reporting query logic in application/query services, not directly in controllers or views.
+Keep reporting query logic in server-side query modules, not directly in React components.
 
 ## Jira Discovery Requirement
 
@@ -172,20 +222,19 @@ Recommended team:
    - Ensures the UI is operational, dense, and useful rather than decorative.
 
 2. Architect Agent
-   - Owns solution structure, domain model, EF Core design, configuration strategy, import boundaries, dependency rules, and technical tradeoffs.
-   - Decides MVC vs Razor Pages based on the simplest maintainable path.
+   - Owns Next.js/Supabase architecture, database schema, RLS model, REST API boundaries, API key auth, import boundaries, dependency rules, and technical tradeoffs.
 
 3. Data / Jira Integration Agent
    - Owns Jira metadata discovery, sanitized field mapping, import interfaces, import run model, importer idempotency, and synthetic fixture design.
    - Must never commit raw Jira data.
 
 4. Fullstack Developer Agent
-   - Owns implementation of the vertical slice: app shell, issue CRUD, configurable terminology, seeded demo data, dashboards, charts, and filters.
+   - Owns implementation of the vertical slice: app shell, issue CRUD, configurable terminology, seeded demo data, REST API, dashboards, charts, and filters.
    - Must respect architecture boundaries and existing user edits.
 
 5. QA / Test Agent
-   - Owns test strategy, unit tests, integration tests, smoke tests, regression tests, accessibility checks, and verification reports.
-   - Runs `dotnet build` and `dotnet test` before handoff.
+   - Owns test strategy, unit tests, integration tests, Playwright tests, smoke tests, regression tests, accessibility checks, and verification reports.
+   - Runs the project build/test/lint commands before handoff.
 
 6. Public Repo Safety / Docs Agent
    - Owns README, public-safe changelog, setup docs, `.gitignore`, `.env.example`, secret scanning, and release-hygiene review.
@@ -204,6 +253,7 @@ Before broad implementation, create or update public-safe docs:
 - `docs/PRODUCT-BRIEF.md`
 - `docs/ARCHITECTURE.md`
 - `docs/DATA-MODEL.md`
+- `docs/API.md`
 - `docs/USER-FLOWS.md`
 - `docs/TEST-PLAN.md`
 - `docs/PUBLIC-REPO-SAFETY.md`
@@ -219,51 +269,69 @@ Do not create public release pipeline runbooks. If release/deployment steps are 
 
 Start with a small coherent vertical slice:
 
-1. Scaffold the .NET solution.
-2. Add domain entities and EF Core migrations for:
-   - project/workspace
-   - issue
+1. Scaffold the Next.js App Router + TypeScript project.
+2. Add Tailwind, shadcn/ui-style primitives, lucide icons, TanStack Table, charting, Zod, and test tooling.
+3. Add Supabase client/server helpers and `.env.example`.
+4. Add Supabase migrations and RLS policies for:
+   - profiles
+   - workspaces/projects
+   - workspace members
+   - issues
+   - configurable terminology
    - configurable statuses
    - configurable severities/priorities
-   - terminology settings
    - source/origin/component
    - missed requirement category
    - diagnosis/fix quality fields
+   - labels
+   - API keys
+   - API audit log
    - import run metadata
-3. Add synthetic seed data only.
-4. Build app shell and navigation.
-5. Build issue list, detail, create, and edit.
-6. Build dashboard with at least three charts:
+5. Add synthetic seed data only.
+6. Build app shell and navigation.
+7. Build issue list, detail, create, and edit.
+8. Build REST API route handlers under `/api/v1`.
+9. Build API key management.
+10. Build dashboard with at least three charts:
    - issue influx over time
    - escaped vs unescaped
    - age by priority
-7. Add reporting query services.
-8. Add Jira discovery/import interfaces, even if the first pass is a dry-run or synthetic adapter.
-9. Add tests.
-10. Update public-safe changelog.
+11. Add reporting query services.
+12. Add Jira discovery/import interfaces, even if the first pass is a dry-run or synthetic adapter.
+13. Add tests.
+14. Update public-safe changelog.
 
 ## Testing Requirements
 
 Before handoff:
 
-- Run `dotnet build`.
-- Run `dotnet test`.
+- Run the package manager install/build/test/lint commands used by the project.
+- Recommended commands after scaffolding:
+  - `npm run lint`
+  - `npm run typecheck`
+  - `npm test`
+  - `npm run test:e2e`
+  - `npm run build`
 - Add unit tests for:
   - terminology/config behavior
   - status/severity normalization
   - report calculations
+  - API request validation
+  - API key hashing/auth behavior
   - Jira field mapping with synthetic payloads
   - issue age and time-to-fix calculations
 - Add integration tests for:
-  - issue CRUD
-  - dashboard query endpoints/services
+  - issue CRUD route handlers
+  - dashboard query services
   - import run creation with synthetic data
-  - authorization or workspace isolation if auth/multi-user exists
-- Add smoke tests for:
-  - app starts
-  - home/dashboard loads
+  - workspace isolation / RLS assumptions
+- Add Playwright tests for:
+  - app loads
+  - sign-in or demo mode loads
+  - dashboard loads
   - issue list loads
   - create issue flow works with synthetic data
+  - charts render nonblank
 - Use only synthetic fixtures.
 - Report exact commands run and whether they passed.
 
@@ -289,12 +357,13 @@ Public repo may include:
 - Test instructions.
 - Local development run instructions.
 - Generic CI that runs build/test only, if it does not disclose private infrastructure.
+- Vercel deployment overview at a generic level.
 
 Public repo must not include:
 
 - Private release pipeline implementation.
 - Environment names.
-- Deployment topology.
+- Deployment topology beyond generic Vercel/Supabase setup.
 - Approval gates.
 - Secret names beyond generic examples.
 - Rollback runbooks.
@@ -325,6 +394,7 @@ Use:
 - Saved views if practical.
 - Drill-down from charts to filtered issue lists.
 - Empty/loading/error states.
+- Icons from lucide where appropriate.
 
 Avoid:
 
@@ -338,11 +408,13 @@ Avoid:
 The first major handoff is done when:
 
 - The repo builds.
-- Tests pass.
+- Tests pass or any failures are clearly explained with next steps.
 - App runs locally.
 - Public-safe docs exist.
 - Issue CRUD works with synthetic data.
 - Configurable terminology exists at least in seed/config form.
+- REST API route handlers exist for issue CRUD and core reports.
+- API key strategy exists for AI clients.
 - Dashboard renders charts from real query services.
 - Jira discovery/import boundary exists and does not commit private Jira data.
 - `CHANGELOG.md` is updated with sanitized entries.
