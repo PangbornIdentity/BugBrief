@@ -1,14 +1,32 @@
+# dependencies
+node_modules
+
+# Next.js
+.next
+out
+
+# build outputs
+coverage
+dist
+build
+
+# local env and secrets
 .env
 .env.local
 .env.*.local
+!.env.example
+
+# hosting and tooling
 .vercel
-node_modules
-.next
-coverage
 playwright-report
 test-results
 *.log
 *.zip
 *.bak
-dist
-build
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+*.tsbuildinfo
