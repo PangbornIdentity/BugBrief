@@ -11,3 +11,5 @@ All notable public-safe changes to BugBrief are tracked here.
 - Added REST demo endpoints for issues, SLA reporting, aging, time-to-fix, health, and OpenAPI discovery.
 - Added a Supabase migration draft with workspace tables, SLA policies, issues, API keys, audit logs, and RLS policies.
 - Added unit tests for SLA and reporting behavior.
+- Added persistent app navigation with Dashboard, Issues, Reports, Settings, and API links.
+- Added initial Issues, Reports, and Settings pages backed by synthetic data.

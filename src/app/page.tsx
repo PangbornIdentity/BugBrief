@@ -58,7 +58,7 @@ export default function Home() {
   }).format(new Date(model.generatedAt));
 
   return (
-    <main className="min-h-screen px-4 py-4 text-zinc-950 sm:px-6 lg:px-8">
+    <div className="px-4 py-4 text-zinc-950 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-5">
         <header className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -159,6 +159,6 @@ export default function Home() {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 }
