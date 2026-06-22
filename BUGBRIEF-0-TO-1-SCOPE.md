@@ -82,7 +82,8 @@ Future user: an engineering manager who wants release health, severity trends, a
 - Structured fields: title, description, reproduction steps, expected result, actual result, severity, priority, status, product area, environment, release/version, source, reporter, assignee, labels.
 - Attachments: screenshots or small files stored in a private Supabase Storage bucket.
 - Triage dashboard: new, open, high severity, blocked, recently closed.
-- Reporting dashboard: bug volume over time, severity distribution, status distribution, top product areas, average time to triage, average time to close.
+- Reporting dashboard: bug volume over time, severity distribution, status distribution, top product areas, average time to triage, average time to close, SLA compliance, and high-priority time-to-fix trends.
+- Configurable SLA policies for high-priority priorities: P0 same local day, P1 warning at 3 days and breach after 5 days, P2 breach after 15 days.
 - Search and filters.
 - Activity timeline for each bug.
 - REST API for AI clients to create, update, query, and report on issues without manual UI entry.
@@ -297,7 +298,22 @@ bugs
   duplicate_of_bug_id uuid references bugs(id)
   first_triaged_at timestamptz
   closed_at timestamptz
+  fixed_at timestamptz
+  sla_due_at timestamptz
+  sla_warning_at timestamptz
+  sla_breached_at timestamptz
   created_by uuid references profiles(id)
+  created_at timestamptz
+  updated_at timestamptz
+
+sla_policies
+  id uuid primary key
+  workspace_id uuid references workspaces(id)
+  priority text not null
+  warning_after_days numeric
+  breach_after_days numeric not null
+  calendar_mode text check calendar_mode in ('calendar_days', 'business_days', 'same_local_day') default 'calendar_days'
+  is_active boolean default true
   created_at timestamptz
   updated_at timestamptz
 
@@ -510,6 +526,8 @@ Core query dimensions:
 - Status
 - Severity
 - Priority
+- SLA state
+- SLA breach status
 - Product area
 - Source
 - Environment
@@ -517,14 +535,28 @@ Core query dimensions:
 - Assignee
 - Reporter
 
+Default SLA policy:
+
+```text
+P0 = same local calendar day by default; configurable per workspace
+P1 = warning at 3 days, breach after 5 days by default
+P2 = breach after 15 days by default
+SLA clocks must support configurable calendar-day vs business-day behavior
+```
+
 KPI definitions:
 
 ```text
 Time to triage = first_triaged_at - created_at
 Time to close = closed_at - created_at
+Time to fix = fixed_at - created_at
 Open bugs = status not in ('closed', 'duplicate', 'wont_fix')
-High severity open bugs = open bugs where severity in ('critical', 'high')
+High priority open bugs = open bugs where priority in ('P0', 'P1', 'P2') or severity in ('critical', 'high')
 Bug escape by version = bugs grouped by app_version and severity
+SLA compliance = closed/fixed high-priority bugs that met their priority SLA / all closed/fixed high-priority bugs
+SLA breach count = open or closed/fixed high-priority bugs whose SLA target was missed
+SLA at-risk count = open high-priority bugs past warning threshold but before breach threshold
+P0/P1/P2 time-to-fix trend = time to fix grouped by priority and period
 ```
 
 MVP export formats:
@@ -542,6 +574,8 @@ MVP export formats:
 - Top affected areas: Area A, Area B, Area C
 - Mean time to triage: N hours
 - Mean time to close: N days
+- P0/P1/P2 SLA compliance: N%
+- High-priority SLA breaches: N
 ```
 
 ## 15. App Architecture
@@ -703,7 +737,7 @@ Security tests:
 - A user can triage, update, close, and reopen bugs.
 - A user can attach at least one screenshot or file privately.
 - Dashboard shows current triage state.
-- Reports page answers "what changed in bug quality this week?"
+- Reports page answers "what changed in bug quality this week?" and shows whether P0/P1/P2 fixes are meeting SLA over time.
 - RLS is enabled and tested for workspace-scoped tables.
 - App deploys on Vercel.
 - Supabase credentials are configured through environment variables.

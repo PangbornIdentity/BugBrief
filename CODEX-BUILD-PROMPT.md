@@ -8,7 +8,7 @@ You are the lead Codex agent for `BugBrief`, a public GitHub repository. Build a
 
 ## Mission
 
-Create BugBrief as a Next.js + Supabase + Vercel application that helps track bug influx over time, bug age, escaped bugs, unescaped defects, missed requirements, origin/source, diagnosis quality, fix quality, and follow-up quality for high-priority issues.
+Create BugBrief as a Next.js + Supabase + Vercel application that helps track bug influx over time, bug age, escaped bugs, unescaped defects, missed requirements, origin/source, diagnosis quality, fix quality, follow-up quality, high-priority SLA compliance, and P0/P1/P2 time-to-fix trends.
 
 The app must be useful for my personal development workflow, but configurable enough that other teams can use different terminology, statuses, severities, and workflows.
 
@@ -64,13 +64,14 @@ My default terminology:
 - Every bug/defect comes from an origin/source code, component, area, or system.
 - Every bug/defect is missed from a requirement.
 - High-priority issues are P0, P1, and P2.
-- For P0/P1/P2, track how well we diagnose, patch, follow up, and root-cause-fix.
+- For P0/P1/P2, track how well we diagnose, patch, follow up, root-cause-fix, and meet time-to-fix SLAs.
 
 Do not hard-code those words as the only possible vocabulary. Model them as configurable display terms and workflow records so another user can rename:
 
 - Bug / defect / issue / incident.
 - Escaped / unescaped.
 - P0/P1/P2.
+- SLA labels and thresholds.
 - Statuses.
 - Sources/origins/components.
 - Requirement categories.
@@ -91,8 +92,9 @@ Build toward these capabilities:
 - Track source/origin/component.
 - Track missed requirement or requirement category.
 - Track date opened, date detected, date triaged, date diagnosis started, date fixed, date verified, date closed.
-- Track bug age and time in status.
+- Track bug age, time in status, and time to fix.
 - Track diagnosis quality for P0/P1/P2.
+- Track configurable SLA targets for high-priority issues: P0 same local day by default, P1 warning at 3 days and breach after 5 days by default, P2 breach after 15 days by default.
 - Track fix approach:
   - quick patch
   - patch plus follow-up
@@ -110,6 +112,7 @@ Build toward these capabilities:
 - Provide API key management for AI/API clients.
 - Provide an OpenAPI document for the REST API.
 - Audit all AI/API writes.
+- Compute SLA state for open and fixed/closed high-priority issues: within SLA, at risk, breached, met, missed.
 
 ## REST API Requirements For AI Clients
 
@@ -137,6 +140,8 @@ GET    /api/v1/reports/influx
 GET    /api/v1/reports/aging
 GET    /api/v1/reports/escaped-ratio
 GET    /api/v1/reports/priority-diagnostics
+GET    /api/v1/reports/sla
+GET    /api/v1/reports/time-to-fix
 
 POST   /api/v1/import/jira/discover
 POST   /api/v1/import/jira/sync
@@ -167,6 +172,10 @@ Initial dashboards should include:
 - Escaped vs unescaped ratio over time.
 - Open issue age distribution.
 - P0/P1/P2 aging.
+- P0/P1/P2 SLA compliance over time.
+- P0/P1/P2 time-to-fix trend over time.
+- Open high-priority bugs that are at risk or breached.
+- SLA breach rate and at-risk count by priority/team/source.
 - Severity/priority distribution.
 - Status distribution.
 - Bugs by origin/source/component.
@@ -283,6 +292,7 @@ Start with a small coherent vertical slice:
    - source/origin/component
    - missed requirement category
    - diagnosis/fix quality fields
+   - SLA policies and per-issue SLA state
    - labels
    - API keys
    - API audit log
@@ -319,10 +329,10 @@ Before handoff:
   - API request validation
   - API key hashing/auth behavior
   - Jira field mapping with synthetic payloads
-  - issue age and time-to-fix calculations
+  - issue age, time-to-fix, and SLA state calculations
 - Add integration tests for:
   - issue CRUD route handlers
-  - dashboard query services
+  - dashboard, SLA, and report query services
   - import run creation with synthetic data
   - workspace isolation / RLS assumptions
 - Add Playwright tests for:
@@ -415,7 +425,7 @@ The first major handoff is done when:
 - Configurable terminology exists at least in seed/config form.
 - REST API route handlers exist for issue CRUD and core reports.
 - API key strategy exists for AI clients.
-- Dashboard renders charts from real query services.
+- Dashboard renders charts from real query services, including high-priority SLA/time-to-fix trends.
 - Jira discovery/import boundary exists and does not commit private Jira data.
 - `CHANGELOG.md` is updated with sanitized entries.
 - Public-repo safety review is complete.
