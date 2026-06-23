@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { BarChart3, Clock3, FileJson, ShieldCheck } from "lucide-react";
+import { getIssueRepository } from "@/lib/issues";
 import { buildDashboardModel } from "@/lib/reports";
+
+export const dynamic = "force-dynamic";
 
 const reportLinks = [
   {
@@ -29,8 +32,10 @@ const reportLinks = [
   },
 ];
 
-export default function ReportsPage() {
-  const model = buildDashboardModel();
+export default async function ReportsPage() {
+  const issueRepository = getIssueRepository();
+  const issues = await issueRepository.listIssues();
+  const model = buildDashboardModel(issues);
 
   return (
     <div className="px-4 py-4 text-zinc-950 sm:px-6 lg:px-8">
@@ -39,7 +44,7 @@ export default function ReportsPage() {
           <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Reports</p>
           <h1 className="mt-2 text-2xl font-semibold text-zinc-950 sm:text-3xl">Quality reporting workspace</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-600">
-            The dashboard is the visual report; these endpoints are the first API-backed reporting surfaces for AI clients.
+            The dashboard is the visual report; these endpoints are the first API-backed reporting surfaces for AI clients. Current source: {issueRepository.source === "supabase" ? "local Supabase" : "synthetic demo data"}.
           </p>
         </header>
 

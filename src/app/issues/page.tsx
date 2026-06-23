@@ -1,5 +1,8 @@
+import { getIssueRepository } from "@/lib/issues";
 import { getEnrichedIssues } from "@/lib/reports";
 import type { SlaState } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
 
 const badgeClasses: Record<SlaState, string> = {
   within_sla: "border-sky-200 bg-sky-50 text-sky-700",
@@ -14,8 +17,10 @@ function formatState(state: SlaState): string {
   return state.replace("_", " ");
 }
 
-export default function IssuesPage() {
-  const issues = getEnrichedIssues().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+export default async function IssuesPage() {
+  const issueRepository = getIssueRepository();
+  const sourceIssues = await issueRepository.listIssues();
+  const issues = getEnrichedIssues(sourceIssues).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return (
     <div className="px-4 py-4 text-zinc-950 sm:px-6 lg:px-8">
@@ -24,7 +29,7 @@ export default function IssuesPage() {
           <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Issues</p>
           <h1 className="mt-2 text-2xl font-semibold text-zinc-950 sm:text-3xl">Bug and defect inventory</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-600">
-            A public-safe synthetic list showing the fields BugBrief will track before Jira and Supabase wiring are enabled.
+            A public-safe list showing the fields BugBrief tracks. Current source: {issueRepository.source === "supabase" ? "local Supabase" : "synthetic demo data"}.
           </p>
         </header>
 

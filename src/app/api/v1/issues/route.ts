@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
+import { getIssueRepository } from "@/lib/issues";
 import { getEnrichedIssues } from "@/lib/reports";
 
-export function GET() {
+export async function GET() {
+  const issueRepository = getIssueRepository();
+  const issues = await issueRepository.listIssues();
+
   return NextResponse.json({
-    data: getEnrichedIssues(),
+    data: getEnrichedIssues(issues),
     meta: {
-      source: "synthetic_demo",
-      warning: "Demo data only. Do not commit proprietary issue payloads.",
+      source: issueRepository.source,
+      warning:
+        issueRepository.source === "demo"
+          ? "Demo data only. Do not commit proprietary issue payloads."
+          : "Supabase-backed local data. Keep local credentials out of git.",
     },
   });
 }
