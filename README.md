@@ -64,6 +64,10 @@ http://localhost:3000/api/v1/openapi.json
 - Vercel hosting
 - Vitest for unit tests
 
+## Local Database
+
+BugBrief can run with synthetic demo data or local Supabase/Postgres. See [Local Database](./docs/local-database.md).
+
 ## Environment
 
 Copy `.env.example` to `.env.local` for local secrets when needed. Leave values blank until Supabase or Jira integration work begins.

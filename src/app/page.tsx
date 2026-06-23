@@ -1,8 +1,11 @@
 import { Activity, AlertOctagon, AlertTriangle, Clock3, Download, Plus, ShieldCheck } from "lucide-react";
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
 import { MetricCard } from "@/components/dashboard/metric-card";
+import { getIssueRepository } from "@/lib/issues";
 import { buildDashboardModel } from "@/lib/reports";
 import type { IssueWithSla, SlaState } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
 
 const badgeClasses: Record<SlaState, string> = {
   within_sla: "border-sky-200 bg-sky-50 text-sky-700",
@@ -50,8 +53,11 @@ function WatchlistRow({ issue }: { issue: IssueWithSla }) {
   );
 }
 
-export default function Home() {
-  const model = buildDashboardModel();
+export default async function Home() {
+  const issueRepository = getIssueRepository();
+  const issues = await issueRepository.listIssues();
+  const model = buildDashboardModel(issues);
+  const dataSourceLabel = issueRepository.source === "supabase" ? "Local Supabase" : "Local demo data";
   const generatedAt = new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -66,7 +72,7 @@ export default function Home() {
               <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
                 <span className="font-semibold text-zinc-950">BugBrief</span>
                 <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">
-                  Local demo data
+                  {dataSourceLabel}
                 </span>
                 <span>Generated {generatedAt}</span>
               </div>
