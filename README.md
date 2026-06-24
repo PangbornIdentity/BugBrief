@@ -9,7 +9,7 @@ This repository is public by design. Do not commit proprietary data, real custom
 Bootstrap app slice:
 
 - Next.js App Router and TypeScript app shell.
-- Local synthetic demo data only.
+- Synthetic demo data by default, with optional local Supabase/Postgres mode.
 - Dashboard with bug/defect influx, SLA outcomes, time-to-fix trends, and an SLA watchlist.
 - REST API demo endpoints under `/api/v1`.
 - Supabase migration draft with workspace-scoped tables and RLS policies.
