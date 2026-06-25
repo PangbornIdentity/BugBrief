@@ -16,3 +16,4 @@ All notable public-safe changes to BugBrief are tracked here.
 - Fixed review findings around workspace-local P0 SLA boundaries, resolved-status imports without timestamps, high-priority average time-to-fix labeling, breached-state iconography, and server-only Supabase service client protection.
 - Added local Supabase/Postgres configuration, synthetic seed data, and a repository boundary for demo vs Supabase data sources.
 - Added the Supabase CLI as a dev dependency plus a db:env helper for reproducible local database setup.
+- Added explicit Supabase API role grants so local service-role reads can access seeded tables.
