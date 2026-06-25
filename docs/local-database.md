@@ -33,17 +33,16 @@ Never commit:
 ## Requirements
 
 - Docker Desktop running
-- Supabase CLI installed
 - Node/npm dependencies installed
+
+`npm install` installs the project-pinned Supabase CLI dev dependency. No global Supabase install is required.
 
 Check local tooling:
 
 ```powershell
 docker --version
-supabase --version
+npx supabase --version
 ```
-
-If `supabase` is not found, install the Supabase CLI first. The repository keeps Supabase as an external developer tool rather than bundling it into app dependencies.
 
 ## Start Local Supabase
 
@@ -79,13 +78,19 @@ Copy the example env file:
 Copy-Item .env.example .env.local
 ```
 
-Then set these values in `.env.local` using output from `supabase status`:
+Then print local Supabase env values:
+
+```powershell
+npm run db:env
+```
+
+Set these values in `.env.local`:
 
 ```text
 BUGBRIEF_DATA_SOURCE=supabase
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<local anon key from supabase status>
-SUPABASE_SERVICE_ROLE_KEY=<local service role key from supabase status>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<local anon key from npm run db:env>
+SUPABASE_SERVICE_ROLE_KEY=<local service role key from npm run db:env>
 ```
 
 Start the app:

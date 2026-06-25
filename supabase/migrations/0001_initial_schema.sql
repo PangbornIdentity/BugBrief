@@ -141,6 +141,20 @@ alter table public.issues enable row level security;
 alter table public.issue_activity enable row level security;
 alter table public.api_keys enable row level security;
 alter table public.api_audit_log enable row level security;
+grant usage on schema public to anon, authenticated, service_role;
+
+grant select on public.profiles to authenticated;
+grant select on public.workspaces to authenticated;
+grant select on public.workspace_members to authenticated;
+grant select on public.terminology_settings to authenticated;
+grant select, insert, update, delete on public.sla_policies to authenticated;
+grant select, insert, update on public.issues to authenticated;
+grant select, insert on public.issue_activity to authenticated;
+grant select, insert, update, delete on public.api_keys to authenticated;
+grant select on public.api_audit_log to authenticated;
+
+grant all privileges on all tables in schema public to service_role;
+grant all privileges on all routines in schema public to service_role;
 
 create policy "profiles can read themselves" on public.profiles
 for select to authenticated using (id = auth.uid());
